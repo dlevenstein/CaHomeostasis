@@ -1,10 +1,11 @@
-figfolder  = '/Users/dlevenstein/Project Repos/CaHomeostasis/DailyNotebook/Figures';
+figfolder  = '/Users/dlevenstein/Project Repos/CaHomeostasis/DailyNotebook/Notebook20191212';
 
 
 %% Parameters
 kf_0 = 1;       %CamKII-independent (i.e. baseline) phosphorylation rate
 kd_0 = 0.5;       %CaN-independent (i.e. baseline) dephosphorylation rate
 k_CamK = 20;     %Maximal CamKII-mediated phoshorpylation rate
+k_CamK = 5;
 k_CaN = 30;      %Maximal CaN-mediated dephosphorylation rate (Free)
 
 Ca_0 = -7.2;       %GluA1-independent (i.e. baseline) Calcium concentration
@@ -18,7 +19,6 @@ Ca_Kdelta = 1;  %How much CamKIIbeta lowers the "threshold" of CamK
                 %10x more sensitive (data)
 Ca_CaN = -6.2;     %Ca midpoint for CaN (data)
 Ca_beta = -6.8;    %Ca midpoint for CamKII alpha-beta transition
-Ca_beta = -6.8;
 
 s_CamK = 8;    %Steepness of CamKII activation (data)
 s_CaN = 4;      %Steepness of CaN activation (data)
@@ -111,25 +111,20 @@ subplot(3,3,9)
 NiceSave('ActivationFunctions',figfolder,[],'includeDate',true)
 
 %%
-maxT = 15*60;
+maxT = 10*60;
 dt = 0.01;
 timesteps = -1000:dt:maxT;
 
 %%
-R_pre = 40;
-R_pulse = [5 20 20 20];
-t_app = [-250 -200 60 8*60];
+R_pre = 32;
+R_pulse = [15 30];
+t_app = [0 200];
 pulsedur = 5;
-R_post = 10;
-t_TTX = [0 10*60];
 
 R=R_pre.*ones(size(timesteps));
 
-R(timesteps>t_TTX(1) & timesteps<t_TTX(2)) = R_post;
-
 for pp = 1:length(R_pulse)
-R(timesteps>t_app(pp) & timesteps<(t_app(pp)+pulsedur)) = ...
-    R(timesteps>t_app(pp) & timesteps<(t_app(pp)+pulsedur))+R_pulse(pp);
+R(timesteps>t_app(pp) & timesteps<(t_app(pp)+pulsedur)) = R_pre+R_pulse(pp);
 end
 
 
@@ -167,7 +162,7 @@ for tt = 2:length(timesteps)
 end
 
 %%
-timwin = [-300 maxT]./60;
+timwin = [-60 maxT]./60;
 figure
 subplot(5,1,1)
     plot(timesteps./60,R,'k')
@@ -205,118 +200,31 @@ subplot(5,1,5)
     ylim([0 1])
 
     
-NiceSave('PulseThenTTX',nullfolder,[],'includeDate',true)
+NiceSave('HebbianDynamics',figfolder,[],'includeDate',true)
 
 
 %% Load the nullclines from XPP
-nullfolder = '/Users/dlevenstein/Project Repos/CaHomeostasis/DailyNotebook/Notebook20191121';
+nullfolder = figfolder;
 
-nullnames = {'Baseline','RateDecrease','BResponse','RateIncrease'};
+nullnames = {'Baseline','Pulse'};
 
 for nn = 1:length(nullnames)
     [ null1{nn},null2{nn} ] = NullclinesFromXPP(fullfile(nullfolder,[nullnames{nn},'.dat'])); 
 end
 
-%[ bifnlines ] = BifnFromXPP( fullfile(nullfolder,'nbbifn.dat') );
 
 %%
 figure
-for nn = 1:4
+for nn = 1:length(nullnames)
     subplot(3,3,nn)
     hold on
-        plot(null1{nn}(:,1),null1{nn}(:,2),'r.','linewidth',2)
-        plot(null2{nn}(:,1),null2{nn}(:,2),'b.','linewidth',2)
+        plot(null1{nn}(:,1),null1{nn}(:,2),'r','linewidth',2)
+        plot(null2{nn}(:,1),null2{nn}(:,2),'k','linewidth',2)
         box on
-        xlabel('m');ylabel('n')
+        xlabel('m');ylabel('A')
         title(nullnames{nn})
-        xlim([0 1]);ylim([0 1])
 end
-NiceSave('PhasePlanes',nullfolder,[],'includeDate',true)
-
-%%
-subplot(2,2,3)
-hold on
-plot(bifnlines(:,1),bifnlines(:,4),'k','linewidth',2)
-plot(bifnlines(:,1),bifnlines(:,2),'k','linewidth',2)
-
-plot(bifnlines(:,1),bifnlines(:,3),'k','linewidth',2)
-plot(n(timesteps>0),b(timesteps>0))
 
 
-xlim([0 1]);ylim([0 1])
-box on
-title('R = 40')
-xlabel('n');ylabel('b')
 
-nulls = [4 5];
-for nn = 1:2
-subplot(3,3,3*nn+3)
-hold on
-plot(bifnlines(:,1),bifnlines(:,4),'k','linewidth',2)
-plot(bifnlines(:,1),bifnlines(:,2),'k','linewidth',2)
-
-plot(bifnlines(:,1),bifnlines(:,3),'k','linewidth',2)
-plot(null1{nulls(nn)}(:,1),null1{nulls(nn)}(:,2),'b.','markersize',1)
-plot(null2{nulls(nn)}(:,1),null2{nulls(nn)}(:,2),'m.','markersize',1)
-
-xlim([0 1]);ylim([0 1])
-box on
-%title('R = 40')
-xlabel('n');ylabel('b')
-end
-% subplot(2,2,4)
-% hold on
-% plot(bifnlines_low(:,1),bifnlines_low(:,2),'k','linewidth',2)
-% plot(bifnlines_low(:,1),bifnlines_low(:,3),'k','linewidth',2)
-% %plot(n(timesteps>0),b(timesteps>0))
-% xlim([0 1]);ylim([0 1])
-% box on
-% title('R = 20')
-
-xlabel('n');ylabel('b')
 NiceSave('PhasePlanes',figfolder,[],'includeDate',true)
-
-%%
-figure
-nulls = [4 5];
-for nn = 1:2
-subplot(3,3,3*nn+2)
-hold on
-plot(bifnlines(:,1),bifnlines(:,4),'k','linewidth',2)
-plot(bifnlines(:,1),bifnlines(:,2),'k','linewidth',2)
-
-plot(bifnlines(:,1),bifnlines(:,3),'k','linewidth',2)
-plot(null1{nulls(nn)}(:,1),null1{nulls(nn)}(:,2),'b.','markersize',1)
-plot(null2{nulls(nn)}(:,1),null2{nulls(nn)}(:,2),'m.','markersize',1)
-
-xlim([0 1]);ylim([0 1])
-box on
-title('R = 40')
-xlabel('n');ylabel('b')
-end
-% subplot(2,2,4)
-% hold on
-% plot(bifnlines_low(:,1),bifnlines_low(:,2),'k','linewidth',2)
-% plot(bifnlines_low(:,1),bifnlines_low(:,3),'k','linewidth',2)
-% %plot(n(timesteps>0),b(timesteps>0))
-% xlim([0 1]);ylim([0 1])
-% box on
-% title('R = 20')
-
-nulls = [6 7];
-for nn = 1:2
-subplot(3,3,3*nn+3)
-hold on
-plot(bifnlines_low(:,1),bifnlines_low(:,2),'k','linewidth',2)
-plot(bifnlines_low(:,1),bifnlines_low(:,3),'k','linewidth',2)
-
-plot(null1{nulls(nn)}(:,1),null1{nulls(nn)}(:,2),'b.','markersize',1)
-plot(null2{nulls(nn)}(:,1),null2{nulls(nn)}(:,2),'m.','markersize',1)
-
-xlim([0 1]);ylim([0 1])
-box on
-title('R = 20')
-xlabel('n');ylabel('b')
-end
-
-NiceSave('DecreaseRate',figfolder,[],'includeDate',true)

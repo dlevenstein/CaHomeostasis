@@ -212,11 +212,11 @@ NiceSave('PulseThenTTX',figfolder,[],'includeDate',true)
 %% Load the nullclines from XPP
 nullfolder = '/Users/dlevenstein/Project Repos/CaHomeostasis/DailyNotebook/Notebook20191126';
 
-% nullnames = {'Baseline','RateDecrease','BResponse','RateIncrease'};
-% 
-% for nn = 1:length(nullnames)
-%     [ null1{nn},null2{nn} ] = NullclinesFromXPP(fullfile(nullfolder,[nullnames{nn},'.dat'])); 
-% end
+nullnames = {'UpperBranch','LowerBranch'};
+
+for nn = 1:length(nullnames)
+    [ null1{nn},null2{nn} ] = NullclinesFromXPP(fullfile(nullfolder,[nullnames{nn},'.dat'])); 
+end
 
 [ nbifnlines ] = BifnFromXPP( fullfile(nullfolder,'nbif_40.dat') );
 [ mbifnlines ] = BifnFromXPP( fullfile(nullfolder,'mbif_40.dat') );
@@ -245,8 +245,19 @@ Cabifnlines_30(:,1) = nbifnlines_30(:,1);
 [Cabifnlines_30(:,3)] = CaFromMN(mbifnlines_30(:,3),nbifnlines_30(:,3),30,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
 [Cabifnlines_30(:,4)] = CaFromMN(mbifnlines_30(:,4),nbifnlines_30(:,4),30,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
 [Cabifnlines_30(:,5)] = CaFromMN(mbifnlines_30(:,5),nbifnlines_30(:,5),30,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
-
-
+%%
+figure
+for nn = 1:2
+    subplot(3,3,nn)
+    hold on
+        plot(null1{nn}(:,1),null1{nn}(:,2),'r.','linewidth',2)
+        plot(null2{nn}(:,1),null2{nn}(:,2),'b.','linewidth',2)
+        box on
+        xlabel('m');ylabel('n')
+        title(nullnames{nn})
+        xlim([0 1]);ylim([0 1])
+end
+NiceSave('PhasePlanes',nullfolder,[],'includeDate',true)
 %%
 %Ca_beta = 
 %s_beta = 
