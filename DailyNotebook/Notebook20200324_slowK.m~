@@ -223,9 +223,27 @@ xppfolder = '/Users/dlevenstein/Project Repos/CaHomeostasis/DailyNotebook/Notebo
 %     [ null1{nn},null2{nn} ] = NullclinesFromXPP(fullfile(xppfolder,[nullnames{nn},'.dat'])); 
 % end
 
-[ nbifnlines ] = BifnFromXPP( fullfile(xppfolder,'nbif_40.dat') );
-[ mbifnlines ] = BifnFromXPP( fullfile(xppfolder,'mbif_40.dat') );
-Cabifnlines(:,1) = nbifnlines(:,1);
+
+
+%%
+[ nbifnlines ] = BifnFromXPP( fullfile(xppfolder,'bifn_nb_R40.dat') );
+[ Abifnlines ] = BifnFromXPP( fullfile(xppfolder,'bifn_Ab_R40.dat') );
+
+%%
+figure
+hold on
+plot(Abifnlines(:,1),Abifnlines(:,3),'k')
+plot(Abifnlines(:,1),Abifnlines(:,4),'k:')
+plot(Abifnlines(:,1),Abifnlines(:,5),'k')
+
+%%
+
+Cabifnlines(:,1) = Abifnlines(:,1);
+for ll = 3:5
+[Cabifnlines(:,ll)] = CaFromA(Abifnlines(:,ll),R,Ca_0,Ca_PSP)
+end
+
+%%
 [Cabifnlines(:,3)] = CaFromMN(mbifnlines(:,3),nbifnlines(:,3),40,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
 [Cabifnlines(:,4)] = CaFromMN(mbifnlines(:,4),nbifnlines(:,4),40,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
 [Cabifnlines(:,5)] = CaFromMN(mbifnlines(:,5),nbifnlines(:,5),40,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);

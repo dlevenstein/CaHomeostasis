@@ -223,100 +223,44 @@ xppfolder = '/Users/dlevenstein/Project Repos/CaHomeostasis/DailyNotebook/Notebo
 %     [ null1{nn},null2{nn} ] = NullclinesFromXPP(fullfile(xppfolder,[nullnames{nn},'.dat'])); 
 % end
 
+
+
+%%
 [ nbifnlines ] = BifnFromXPP( fullfile(xppfolder,'bifn_nb_R40.dat') );
-[ Abifnlines ] = BifnFromXPP( fullfile(xppfolder,'bifn_Ab_R40.dat') );
-Cabifnlines(:,1) = nbifnlines(:,1);
-[Cabifnlines(:,3)] = CaFromMN(mbifnlines(:,3),nbifnlines(:,3),40,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
-[Cabifnlines(:,4)] = CaFromMN(mbifnlines(:,4),nbifnlines(:,4),40,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
-[Cabifnlines(:,5)] = CaFromMN(mbifnlines(:,5),nbifnlines(:,5),40,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
+[ Abifnlines_40 ] = BifnFromXPP( fullfile(xppfolder,'bifn_Ab_R40.dat') );
+[ Abifnlines_20 ] = BifnFromXPP( fullfile(xppfolder,'bifn_Ab_R20.dat') );
 
-[ nbifnlines_20 ] = BifnFromXPP( fullfile(xppfolder,'nbif_20.dat') );
-[ mbifnlines_20 ] = BifnFromXPP( fullfile(xppfolder,'mbif_20.dat') );
-Cabifnlines_20(:,1) = nbifnlines_20(:,1);
-[Cabifnlines_20(:,3)] = CaFromMN(mbifnlines_20(:,3),nbifnlines_20(:,3),20,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
-[Cabifnlines_20(:,4)] = CaFromMN(mbifnlines_20(:,4),nbifnlines_20(:,4),20,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
-[Cabifnlines_20(:,5)] = CaFromMN(mbifnlines_20(:,5),nbifnlines_20(:,5),20,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
 
-[ nbifnlines_50 ] = BifnFromXPP( fullfile(xppfolder,'nbif_50.dat') );
-[ mbifnlines_50 ] = BifnFromXPP( fullfile(xppfolder,'mbif_50.dat') );
-Cabifnlines_50(:,1) = nbifnlines_50(:,1);
-[Cabifnlines_50(:,3)] = CaFromMN(mbifnlines_50(:,3),nbifnlines_50(:,3),50,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
-[Cabifnlines_50(:,4)] = CaFromMN(mbifnlines_50(:,4),nbifnlines_50(:,4),50,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
-[Cabifnlines_50(:,5)] = CaFromMN(mbifnlines_50(:,5),nbifnlines_50(:,5),50,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
-
-[ nbifnlines_30 ] = BifnFromXPP( fullfile(xppfolder,'nbif_30.dat') );
-[ mbifnlines_30 ] = BifnFromXPP( fullfile(xppfolder,'mbif_30.dat') );
-Cabifnlines_30(:,1) = nbifnlines_30(:,1);
-[Cabifnlines_30(:,3)] = CaFromMN(mbifnlines_30(:,3),nbifnlines_30(:,3),30,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
-[Cabifnlines_30(:,4)] = CaFromMN(mbifnlines_30(:,4),nbifnlines_30(:,4),30,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
-[Cabifnlines_30(:,5)] = CaFromMN(mbifnlines_30(:,5),nbifnlines_30(:,5),30,Ca_0,Ca_PSP,kf_0,k_CamK,kd_0,k_CaN);
 %%
-figure
-for nn = 1:2
-    subplot(3,3,nn)
-    hold on
-        plot(null1{nn}(:,1),null1{nn}(:,2),'r.','linewidth',2)
-        plot(null2{nn}(:,1),null2{nn}(:,2),'b.','linewidth',2)
-        box on
-        xlabel('m');ylabel('n')
-        title(nullnames{nn})
-        xlim([0 1]);ylim([0 1])
+R = 40;
+Cabifnlines_40(:,1) = Abifnlines_40(:,1);
+for ll = 3:5
+[Cabifnlines_40(:,ll)] = CaFromA(Abifnlines_40(:,ll),R,Ca_0,Ca_PSP);
 end
-NiceSave('PhasePlanes',xppfolder,[],'includeDate',true)
+
+R = 20;
+Cabifnlines_20(:,1) = Abifnlines_20(:,1);
+for ll = 3:5
+[Cabifnlines_20(:,ll)] = CaFromA(Abifnlines_20(:,ll),R,Ca_0,Ca_PSP);
+end
 %%
-%Ca_beta = 
-%s_beta = 
+Ca_beta_osc = -6.75;
+s_beta_osc = -20;
 
 figure
-
-
-subplot(2,2,1)
 hold on
-plot(Cabifnlines(:,1),Cabifnlines(:,3),'k')
-plot(Cabifnlines(:,1),Cabifnlines(:,4),'k:')
-plot(Cabifnlines(:,1),Cabifnlines(:,5),'k')
-
+plot(Cabifnlines_40(:,1),Cabifnlines_40(:,3),'k')
+plot(Cabifnlines_40(:,1),Cabifnlines_40(:,4),'k:')
+plot(Cabifnlines_40(:,1),Cabifnlines_40(:,5),'k')
 
 plot(Cabifnlines_20(:,1),Cabifnlines_20(:,3),'k')
 plot(Cabifnlines_20(:,1),Cabifnlines_20(:,4),'k:')
 plot(Cabifnlines_20(:,1),Cabifnlines_20(:,5),'k')
-
-plot(Cabifnlines_50(:,1),Cabifnlines_50(:,3),'k')
-plot(Cabifnlines_50(:,1),Cabifnlines_50(:,4),'k:')
-plot(Cabifnlines_50(:,1),Cabifnlines_50(:,5),'k')
-
-plot(Cabifnlines_30(:,1),Cabifnlines_30(:,3),'k')
-plot(Cabifnlines_30(:,1),Cabifnlines_30(:,4),'k:')
-plot(Cabifnlines_30(:,1),Cabifnlines_30(:,5),'k')
-plot(Sigmoid(Ca_X,Ca_beta,s_beta),Ca_X)
-axis tight
-xlim([0 1])
-xlabel('b');ylabel('Ca (LogM)')
-
-NiceSave('CaB_byRate',figfolder,[],'includeDate',true)
-
-
-%%
-Ca_beta_osc = -6.5;
-s_beta_osc = -20;
-
-figure
-
-
-subplot(2,2,1)
-hold on
-
-plot(Cabifnlines_50(:,1),Cabifnlines_50(:,3),'k')
-plot(Cabifnlines_50(:,1),Cabifnlines_50(:,4),'k:')
-plot(Cabifnlines_50(:,1),Cabifnlines_50(:,5),'k')
-
-plot(Cabifnlines(:,1),Cabifnlines(:,3),'k')
-plot(Cabifnlines(:,1),Cabifnlines(:,4),'k:')
-plot(Cabifnlines(:,1),Cabifnlines(:,5),'k')
 plot(Sigmoid(Ca_X,Ca_beta_osc,s_beta_osc),Ca_X)
 axis tight
 xlim([0 1])
 xlabel('b');ylabel('Ca (LogM)')
+
 
 NiceSave('Osc_CaB_byRate',figfolder,[],'includeDate',true)
 
@@ -330,11 +274,11 @@ dt = 0.01;
 timesteps = -1000:dt:maxT;
 
 %%
-R_pre = 50;
+R_pre = 40;
 R_pulse = [0 0 0 0];
 t_app = [-250 -200 60 8*60];
 pulsedur = 5;
-R_post = 40;
+R_post = 20;
 t_TTX = [0 maxT];
 
 R=R_pre.*ones(size(timesteps));
@@ -395,14 +339,14 @@ subplot(5,1,2)
     plot(timesteps./60,A,'k')
     ylabel('pGluA1')
     xlim(timwin)
-    ylim([0 1])
+    ylim([0 0.3])
     box off
 subplot(5,1,3)
     plot(timesteps./60,Ca,'k')
     ylabel('Ca')
     xlim(timwin)
     box off
-    ylim([Ca_0 -2.5])
+    ylim([Ca_0 -4.5])
 subplot(5,1,4)
     plot(timesteps./60,m,'r')
     hold on
@@ -411,7 +355,7 @@ subplot(5,1,4)
     legend('m','n')
     xlim(timwin)
     box off
-    ylim([0 1])
+    ylim([0 0.2])
 subplot(5,1,5)
     plot(timesteps./60,b,'k')
     ylabel('% Beta')
