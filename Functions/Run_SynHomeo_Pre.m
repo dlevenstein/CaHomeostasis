@@ -1,4 +1,4 @@
-function [simresults,parms] = Run_SynHomeo(manip,parms,timeparms,varargin)
+function [simresults,parms] = Run_SynHomeo_Pre(manip,parms,timeparms,varargin)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -13,7 +13,7 @@ addParameter(p,'saveFig',false)
 addParameter(p,'figname',[])
 addParameter(p,'startON',false)
 addParameter(p,'FixYRange',false)
-addParameter(p,'blockBase',true)
+addParameter(p,'PreActFun','sigmoid') %'bell' or 'signmoid'
 
 
 parse(p,varargin{:})
@@ -24,9 +24,9 @@ saveFig_AF = p.Results.saveFig_AF;
 startON = p.Results.startON;
 FixYRange = p.Results.FixYRange;
 showfig = p.Results.showfig;
-blockBase = p.Results.blockBase;
+PreActFun = p.Results.PreActFun;
 
-
+bellwidth = 0.5;
 
 %% Default Parameters
 DefaultParms.kf_0 = 1e-4;       %CamKII-independent (i.e. baseline) phosphorylation rate
@@ -37,21 +37,26 @@ DefaultParms.k_CaN = 0.15;      %Maximal CaN-mediated dephosphorylation rate (Fr
 DefaultParms.Ca_0 = -7.5;       %GluA1-independent (i.e. baseline) Calcium concentration
                             %(-6.854 at eqfrom SS)
 DefaultParms.Ca_PSP = 1;     %Calcium per 1Hz PSPs with GluA1 fully phosphorylated
-DefaultParms.Ca_V = 0;     %Calcium through CaV channels per 1Hz PSPs
 
 DefaultParms.Ca_Kalpha = -5.5;   %Ca midpoint for CamKII alpha (data)
 DefaultParms.Ca_Kdelta = 1;  %How much CamKIIbeta lowers the "threshold" of CamK
                                 %10x more sensitive (data)
 DefaultParms.Ca_CaN = -6.4;     %Ca midpoint for CaN (data)
 DefaultParms.Ca_beta = -7.05;    %Ca midpoint for CamKII alpha-beta transition
+DefaultParms.Ca_pre = -6.75;    %Ca midpoint for presynaptic feedback
 
 DefaultParms.s_CamK = 8;    %Steepness of CamKII activation (data)
 DefaultParms.s_CaN = 6;      %Steepness of CaN activation (data)
 DefaultParms.s_beta = -35;     %(Free)
+DefaultParms.s_pre = 8;      %Steepness of presynaptic activation (data)
 
 DefaultParms.tau_CamK = 1;   %Timescale of CamKII activation (data)
 DefaultParms.tau_CaN = 40;   %Timescale of CaN activation (data)
 DefaultParms.tau_beta = 300; %Timescale of CamKII alpha-beta transition
+DefaultParms.tau_pre = 300;  %Timescale of presynaptic feedback
+
+DefaultParms.mini_min = 10;
+DefaultParms.mini_max = 70;
 
 parms = EnterDefaultParms(parms,DefaultParms);
 
@@ -64,21 +69,26 @@ k_CaN = parms.k_CaN;
 Ca_0 = parms.Ca_0;
                      
 Ca_PSP = parms.Ca_PSP;
-Ca_V = parms.Ca_V;
 
 Ca_Kalpha = parms.Ca_Kalpha;
 Ca_Kdelta = parms.Ca_Kdelta;
 
 Ca_CaN = parms.Ca_CaN;
 Ca_beta = parms.Ca_beta;
+Ca_pre = parms.Ca_pre;
 
 s_CamK = parms.s_CamK;
 s_CaN = parms.s_CaN;
 s_beta = parms.s_beta;
+s_pre = parms.s_pre;
 
 tau_CamK = parms.tau_CamK;
 tau_CaN = parms.tau_CaN;
 tau_beta = parms.tau_beta;
+tau_pre = parms.tau_pre;
+
+mini_max = parms.mini_max;
+mini_min = parms.mini_min;
 
 %% Time Parameters
 DefaultTimeParms.maxT = 15*60; %
@@ -111,14 +121,6 @@ blockM = manip.blockM(timesteps);
 blockB = manip.blockB(timesteps);
 Ca_ext = manip.Ca_ext(timesteps);
 Autophos = manip.Autophos;
-
-if blockBase
-    blockN_base = blockN;
-    blockM_base = blockM;
-else
-    blockN_base = ones(size(blockN));
-    blockM_base = ones(size(blockM));
-end
 %%
 if SHOWFIG_AF | saveFig_AF
 Ca_Kbeta = Ca_Kalpha-Ca_Kdelta;
@@ -158,9 +160,28 @@ axis tight
 ylim([0 1])
     xlabel('Ca');ylabel('% Beta')
     
+subplot(4,2,7)
+    hold on
+    switch PreActFun
+        case 'bell'
+            plot(Ca_X,Sigmoid(Ca_X,Ca_pre,s_pre).*(mini_max-mini_min)+mini_min,...
+                '--','color','k','linewidth',2)
+            hold on
+            plot(Ca_X,Sigmoid(Ca_X,Ca_pre+bellwidth,-s_pre).*(mini_max-mini_min)+mini_min,...
+                '--','color','k','linewidth',2)
+            plot(Ca_X,Sigmoid(Ca_X,Ca_pre+bellwidth,-s_pre).*Sigmoid(Ca_X,Ca_pre,s_pre)*(mini_max-mini_min)+mini_min,...
+                'color','k','linewidth',2)
+        case 'sigmoid'
+            plot(Ca_X,Sigmoid(Ca_X,Ca_pre,s_pre)*(mini_max-mini_min)+mini_min,...
+                'color','k','linewidth',2)
+    end
+axis tight
+%ylim([0 1])
+    xlabel('Ca');ylabel('Mini Rate')
+    
     
 subplot(3,3,3)
-    imagesc(A_X,R_X,Ca_0 + log10(R_XY.*Ca_PSP.*A_XY + R_XY.*Ca_V))
+    imagesc(A_X,R_X,Ca_0 + log10(R_XY.*Ca_PSP.*A_XY))
     ColorbarWithAxis([-7 -5],'logCa')
     axis xy
     xlabel('A (pGluA1)');ylabel('Rate');
@@ -202,9 +223,10 @@ Ca = -7.*ones(size(timesteps));
 m = zeros(size(timesteps));
 n = zeros(size(timesteps));
 b = zeros(size(timesteps));
+p = zeros(size(timesteps));
 
 if startON
-    A(1)=1;Ca(1)=-5;m(1)=1;n(1)=1;b(1)=1;
+    A(1)=1;Ca(1)=-5;m(1)=1;n(1)=1;b(1)=1;p(1)=1;
 end
 
 for tt = 2:length(timesteps)
@@ -215,20 +237,30 @@ for tt = 2:length(timesteps)
     dndt = (-n(tt-1) + Sigmoid(Ca(tt-1),Ca_CaN,s_CaN))./tau_CaN;
     dbdt = (-b(tt-1) + Sigmoid(Ca(tt-1),Ca_beta,s_beta))./tau_beta;
 
+    if strcmp(PreActFun,'sigmoid')
+        dpdt = (-p(tt-1) + Sigmoid(Ca(tt-1),Ca_pre,s_pre))./tau_pre;
+    elseif strcmp(PreActFun,'bell')
+        dpdt = (-p(tt-1) + Sigmoid(Ca(tt-1),Ca_pre+bellwidth,-s_pre).*Sigmoid(Ca(tt-1),Ca_pre,s_pre))./tau_pre;
+    else
+        error('...your presynapic activation function input is WRONG')
+    end
+
     A(tt) = A(tt-1) + dAdt.*dt;
     m(tt) = m(tt-1) + dmdt.*dt;
     n(tt) = n(tt-1) + dndt.*dt;
     b(tt) = b(tt-1) + dbdt.*dt;
+    p(tt) = p(tt-1) + dpdt.*dt;
 
     %Experimental Manipulations
-    m(tt) = m(tt);
-    n(tt) = n(tt);
+    m(tt) = m(tt).*blockM(tt).*Autophos;
+    n(tt) = n(tt).*blockN(tt);
     b(tt) = b(tt).*blockB(tt);
     
-    Ca(tt) = Ca_0 + log10(R(tt).*Ca_PSP.*A(tt) + R(tt).*Ca_V) + Ca_ext(tt);
+    R(tt) = R(tt) + p(tt)*(mini_max-mini_min)+mini_min;
+    Ca(tt) = Ca_0 + log10(R(tt).*Ca_PSP.*A(tt)) + Ca_ext(tt);
     
-    kf(tt) = (kf_0.*blockM_base(tt) + k_CamK.*m(tt).*blockM(tt).*Autophos);
-    kd(tt) = (kd_0.*blockN_base(tt) + k_CaN.*n(tt).*blockN(tt));
+    kf(tt) = (kf_0.*blockM(tt) + k_CamK.*m(tt));
+    kd(tt) = (kd_0.*blockN(tt) + k_CaN.*n(tt));
     
 end
 

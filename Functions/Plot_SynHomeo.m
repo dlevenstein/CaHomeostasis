@@ -10,6 +10,7 @@ addParameter(p,'YScale',1)
 addParameter(p,'figwidth',1)
 addParameter(p,'fignum',1)
 addParameter(p,'title',[])
+addParameter(p,'linecolor','k')
 
 
 parse(p,varargin{:})
@@ -19,13 +20,14 @@ FixYRange = p.Results.FixYRange;
 figwidth = p.Results.figwidth;
 fignum = p.Results.fignum;
 plottitle = p.Results.title;
+linecolor = p.Results.linecolor;
 
 %%
 timwin = [-5 simresults.t_hr(end)];
 
 subplot(6,figwidth,(0.*figwidth)+fignum)
     hold on
-    plot(simresults.t_hr,simresults.R,'k','linewidth',2)
+    plot(simresults.t_hr,simresults.R,linecolor,'linewidth',2)
     xlim(timwin)
     box off
     
@@ -36,7 +38,7 @@ subplot(6,figwidth,(0.*figwidth)+fignum)
     title(plottitle)
 subplot(6,figwidth,(1.*figwidth)+fignum)
     hold on
-    plot(simresults.t_hr,simresults.A,'k','linewidth',2)
+    plot(simresults.t_hr,simresults.A,linecolor,'linewidth',2)
     ylabel('pGluA1')
     xlim(timwin)
     %ylim([0 1])
@@ -46,7 +48,7 @@ subplot(6,figwidth,(1.*figwidth)+fignum)
     end
 subplot(6,figwidth,(2.*figwidth)+fignum)
     hold on
-    plot(simresults.t_hr,simresults.Ca,'k','linewidth',2)
+    plot(simresults.t_hr,simresults.Ca,linecolor,'linewidth',2)
     ylabel('Ca')
     xlim(timwin)
     box off
@@ -77,7 +79,7 @@ subplot(6,figwidth,(4.*figwidth)+fignum)
     end
 subplot(6,figwidth,(5.*figwidth)+fignum)
     hold on
-    plot(simresults.t_hr,simresults.b,'k','linewidth',2)
+    plot(simresults.t_hr,simresults.b,linecolor,'linewidth',2)
     ylabel('% Beta')
     xlim(timwin)
     box off
