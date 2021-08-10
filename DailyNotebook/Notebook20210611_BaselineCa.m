@@ -1,10 +1,10 @@
-figfolder  = '/Users/dl2820/Project Repos/CaHomeostasis/DailyNotebook/Notebook20210614';
+figfolder  = '/Users/dl2820/Project Repos/CaHomeostasis/DailyNotebook/Notebook20210611';
 
 %%
 Ca_0 = -8;       %GluA1-independent (i.e. baseline) Calcium concentration
                          %(-6.854 at eqfrom SS)
-Ca_PSC0 = 0.3e-8;     %Calcium per 1Hz PSPs through non-GluA1 sources
-alpha = 3;
+Ca_PSC0 = 0.5e-8;     %Calcium per 1Hz PSPs through non-GluA1 sources
+alpha = 1;
 %%
 Ca = linspace(Ca_0,-6.5,100);
 
@@ -95,10 +95,6 @@ Ca_CaN = -6.4;     %Ca midpoint for CaN (data)
 s_CaN = 6;      %Steepness of CaN activation (data)
 k_CaN = 0.11;
 
-
-kf_0 = 1e-4; 
-k_CaN = 1e-2;
-
 n = Sigmoid( Ca,Ca_CaN,s_CaN,1);
 kf = kf_0;
 kd = k_CaN.*n;
@@ -107,93 +103,33 @@ A = kf./(kf+kd);
 %R = 10.^(Ca - Ca_0)./(A.*Ca_PSP);
 R = (10.^Ca - 10.^Ca_0)./(Ca_PSC0.*(alpha.*A+1));
 
-%kf0s
-kf0s = [1e-3 1e-5]';
-A_kf0 = kf0s./(kf0s+kd);
-R_kf0 = (10.^Ca - 10.^Ca_0)./(Ca_PSC0.*(alpha.*A_kf0+1));
-
-%k_CaNs
-k_CaNs = [1e-1 1e-3]';
-A_kds = kf./(kf+k_CaNs.*n);
-R_kd = (10.^Ca - 10.^Ca_0)./(Ca_PSC0.*(alpha.*A_kds+1));
-
-%R1/2
-Rs = linspace(0,60,60);
-Ca_Ahalf = log10(10.^Ca_0 + Ca_PSC0.*Rs + Ca_PSC0.*alpha.*0.5.*Rs);
-k_ratio = Sigmoid( Ca_Ahalf,Ca_CaN,s_CaN,1);
-
 %%
 figure
 subplot(2,2,1)
-    plot((R),Ca,'k')
-    hold on
-    plot((R_none),Ca,'k--')
-    plot((R_full),Ca,'k--')
-    ylabel('logCa')
-    %plot(log10(R),A,'r')
-    %LogScale('x',10)
-    xlabel('R');
-    box off
-    axis tight
+plot((R),Ca,'k')
+hold on
+plot((R_none),Ca,'k--')
+plot((R_full),Ca,'k--')
+ylabel('logCa')
+%plot(log10(R),A,'r')
+%LogScale('x',10)
+xlabel('R');
+box off
+axis tight
     axis tight
     xlim([0 60])
     yrange = ylim(gca);
 
 subplot(2,2,2)
-    plot(n,Ca)
-    hold on
-    plot(A,Ca)
-    ylim(yrange)
-    legend('n(Ca)','A(Ca)')
-    box off
-    xlabel('n, A')
-   
-subplot(3,3,7)
-    plot((R),Ca,'k')
-    hold on
-    plot((R_kf0),Ca,'k:')
-    plot((R_none),Ca,'--','color',[0.5 0.5 0.5])
-    plot((R_full),Ca,'--','color',[0.5 0.5 0.5])
-    ylabel('logCa')
-    %plot(log10(R),A,'r')
-    %LogScale('x',10)
-    xlabel('R');
-    box off
-    axis tight
-    axis tight
-    xlim([0 60])
-    yrange = ylim(gca);
-    title('k_f_0')
-    
-subplot(3,3,8)
-    plot((R),Ca,'k')
-    hold on
-    plot((R_kd),Ca,'k:')
-    plot((R_none),Ca,'--','color',[0.5 0.5 0.5])
-    plot((R_full),Ca,'--','color',[0.5 0.5 0.5])
-    ylabel('logCa')
-    %plot(log10(R),A,'r')
-    %LogScale('x',10)
-    xlabel('R');
-    box off
-    axis tight
-    axis tight
-    xlim([0 60])
-    yrange = ylim(gca);    
-    title('k_C_a_N')
-    
-    
-subplot(3,3,9)
-    plot(k_ratio,Rs,'k')
-    xlabel('k_f_0 / k_C_a_N')
-    ylabel('R_A_0_._5')
-    box off
-    
-    
+plot(n,Ca)
+hold on
+plot(A,Ca)
+ylim(yrange)
+legend('n(Ca)','A(Ca)')
+box off
+xlabel('n, A')
 NiceSave('RCa_A',figfolder,[],'includeDate',true)
 %%
-
-
 
 
 %% Simulate steady state calcium as f'n of rate

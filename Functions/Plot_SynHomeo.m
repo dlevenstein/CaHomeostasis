@@ -27,7 +27,10 @@ timwin = [-5 simresults.t_hr(end)];
 
 subplot(6,figwidth,(0.*figwidth)+fignum)
     hold on
-    plot(simresults.t_hr,simresults.R,linecolor,'linewidth',2)
+    plot(simresults.t_hr,simresults.R,'color',linecolor,'linewidth',2)
+    if isfield(simresults,'p')
+       % plot(simresults.t_hr,
+    end
     xlim(timwin)
     box off
     
@@ -38,7 +41,7 @@ subplot(6,figwidth,(0.*figwidth)+fignum)
     title(plottitle)
 subplot(6,figwidth,(1.*figwidth)+fignum)
     hold on
-    plot(simresults.t_hr,simresults.A,linecolor,'linewidth',2)
+    plot(simresults.t_hr,simresults.A,'color',linecolor,'linewidth',2)
     ylabel('pGluA1')
     xlim(timwin)
     %ylim([0 1])
@@ -48,7 +51,7 @@ subplot(6,figwidth,(1.*figwidth)+fignum)
     end
 subplot(6,figwidth,(2.*figwidth)+fignum)
     hold on
-    plot(simresults.t_hr,simresults.Ca,linecolor,'linewidth',2)
+    plot(simresults.t_hr,simresults.Ca,'color',linecolor,'linewidth',2)
     ylabel('Ca')
     xlim(timwin)
     box off
@@ -79,7 +82,7 @@ subplot(6,figwidth,(4.*figwidth)+fignum)
     end
 subplot(6,figwidth,(5.*figwidth)+fignum)
     hold on
-    plot(simresults.t_hr,simresults.b,linecolor,'linewidth',2)
+    plot(simresults.t_hr,simresults.b,'color',linecolor,'linewidth',2)
     ylabel('% Beta')
     xlim(timwin)
     box off
@@ -90,7 +93,7 @@ subplot(6,figwidth,(5.*figwidth)+fignum)
     end
 
 if saveFig  
-    NiceSave('PulseThenTTX',saveFig,figname,'includeDate',true)
+    NiceSave(figname,saveFig,[],'includeDate',true)
 end
 
 end

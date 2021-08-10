@@ -1,4 +1,4 @@
-figfolder  = '/Users/dl2820/Project Repos/CaHomeostasis/DailyNotebook/Notebook20210614';
+figfolder  = '/Users/dl2820/Project Repos/CaHomeostasis/DailyNotebook/Notebook20210618';
 
 %%
 Ca_0 = -8;       %GluA1-independent (i.e. baseline) Calcium concentration
@@ -96,19 +96,19 @@ s_CaN = 6;      %Steepness of CaN activation (data)
 k_CaN = 0.11;
 
 
-kf_0 = 1e-4; 
-k_CaN = 1e-2;
+kappa = 0.01;
+kf_0 = 1e-3; 
+k_CaN = kf_0./kappa;
 
 n = Sigmoid( Ca,Ca_CaN,s_CaN,1);
 kf = kf_0;
 kd = k_CaN.*n;
 
 A = kf./(kf+kd);
-%R = 10.^(Ca - Ca_0)./(A.*Ca_PSP);
 R = (10.^Ca - 10.^Ca_0)./(Ca_PSC0.*(alpha.*A+1));
 
 %kf0s
-kf0s = [1e-3 1e-5]';
+kf0s = [1e-2 1e-4]';
 A_kf0 = kf0s./(kf0s+kd);
 R_kf0 = (10.^Ca - 10.^Ca_0)./(Ca_PSC0.*(alpha.*A_kf0+1));
 
@@ -191,10 +191,8 @@ subplot(3,3,9)
     
     
 NiceSave('RCa_A',figfolder,[],'includeDate',true)
-%%
 
 
-%% THIS IS OLD %% UPDATE EVENTUALLY
 
 %% Simulate steady state calcium as f'n of rate
 
@@ -204,112 +202,130 @@ parms= struct();
 timeparms = struct();
 manip = struct();
 
-
-
 timeparms.maxT = 0;
-timeparms.preT = 4000;
+timeparms.preT = 6000;
 
-R_pres = logspace(0.5,4,22);
+parms.Ca_PSP0 = Ca_PSC0;
+parms.Ca_A = 0;
+parms.Ca_0 = Ca_0;
+
+parms.kd_0 = 0;
+parms.kf_0 = kf_0;
+parms.k_CaN = kf_0./kappa;
+parms.k_CamK = 0;
+
+R_pres = logspace(0,2,5);
 
 for rr = 1:length(R_pres)
     bz_Counter(rr,length(R_pres),'sim')
     
-R_pre = R_pres(rr);
-manip.rate = @(t) R_pre .* ones(size(t));
+    R_pre = R_pres(rr);
+    manip.rate = @(t) R_pre .* ones(size(t));
 
-[simresults,parms] = Run_SynHomeo(manip,parms,timeparms,'startON',false);
-equilvals.Ca(rr) = simresults.Ca(end);
-equilvals.b(rr) = simresults.b(end);
-equilvals.m(rr) = simresults.m(end);
-equilvals.n(rr) = simresults.n(end);
-[simresults,parms] = Run_SynHomeo(manip,parms,timeparms,'startON',true);
-equilvals.Ca_on(rr) = simresults.Ca(end);
-equilvals.b_on(rr) = simresults.b(end);
-equilvals.m_on(rr) = simresults.m(end);
-equilvals.n_on(rr) = simresults.n(end);
-close all
+    parms.Ca_A = 0;
+    parms.kf_0 = kf_0;
+    [simresults,parms] = Run_SynHomeo2(manip,parms,timeparms);
+    equilvals.Ca(rr) = simresults.Ca(end);
+    equilvals.b(rr) = simresults.b(end);
+    equilvals.m(rr) = simresults.m(end);
+    equilvals.n(rr) = simresults.n(end);
+    close all
+
+    parms.kf_0 = 100;
+    parms.Ca_A = alpha.*Ca_PSC0;
+    [simresults,parms] = Run_SynHomeo2(manip,parms,timeparms);
+    equilvals_Full.Ca(rr) = simresults.Ca(end);
+    equilvals_Full.b(rr) = simresults.b(end);
+    equilvals_Full.m(rr) = simresults.m(end);
+    equilvals_Full.n(rr) = simresults.n(end);
+    close all
+
+    parms.kf_0 = kf_0;
+    parms.Ca_A = alpha.*Ca_PSC0;
+    [simresults,parms] = Run_SynHomeo2(manip,parms,timeparms);
+    equilvals_Eq.Ca(rr) = simresults.Ca(end);
+    equilvals_Eq.b(rr) = simresults.b(end);
+    equilvals_Eq.m(rr) = simresults.m(end);
+    equilvals_Eq.n(rr) = simresults.n(end);
+    close all
 end
-
-
-%%
-Ca = linspace(Ca_0,-4,100);
-n = Sigmoid( Ca,parms.Ca_CaN,parms.s_CaN,1);
-kf = parms.kf_0;
-kd = parms.k_CaN.*n;
-
-A = kf./(kf+kd);
-R = 10.^(Ca - parms.Ca_0)./(A.*parms.Ca_PSP);
-
-kd = parms.kd_0;
-A = kf./(kf+kd);
-R_none = 10.^(Ca - parms.Ca_0)./(A.*parms.Ca_PSP);
 
 %%
 figure
-subplot(2,2,1)
-plot(log10(R_none),Ca,'k--')
-hold on
-plot(log10(R),Ca,'k')
-plot(log10(R_pres),equilvals.Ca,'ko')
-plot(log10(R_pres),equilvals.Ca_on,'ko')
+plot(simresults.t_hr,simresults.Ca,'k')
+%%
+figure
+    subplot(2,2,1)
+        plot((R),Ca,'k')
+        hold on
+        plot((R_none),Ca,'k--')
+        plot((R_full),Ca,'k--')
+        plot(R_pres,equilvals.Ca,'o')
+        plot(R_pres,equilvals_Full.Ca,'o')
+        plot(R_pres,equilvals_Eq.Ca,'o')
+        ylabel('logCa')
+        %plot(log10(R),A,'r')
+        %LogScale('x',10)
+        xlabel('R');
+        box off
+        axis tight
+        axis tight
+        xlim([0 60])
+        yrange = ylim(gca);
 
 
-legend('No CaN/CamKII','Theory: CaN Only','Simulation: With CamKII','location','northwest')
-xlabel('PSP Rate');ylabel('Equilibrium Ca (log)')
-box off
-axis tight
-xlim(log10(R_pres([1 end])))
-LogScale('x',10)
+ %% Simulate CaEq as function of Kfo (keeping kappa constant)
+parms= struct();
+timeparms = struct();
+manip = struct();
 
+timeparms.maxT = 0;
+timeparms.preT = 6000;
 
-subplot(2,2,2)
-plot(n,Ca)
-hold on
-plot(Sigmoid( Ca,parms.Ca_beta,parms.s_beta,1),Ca)
+parms.Ca_PSP0 = Ca_PSC0;
+parms.Ca_A = alpha.*Ca_PSC0;
+parms.Ca_0 = Ca_0;
 
+parms.kd_0 = 0;
+parms.kf_0 = kf_0;
+parms.k_CaN = kf_0./kappa;
+parms.k_CamK = 0;
 
-subplot(4,2,5)
-    hold on
-    plot(log10(R_pres),(equilvals.b),'bo')
-    plot(log10(R_pres),(equilvals.b_on),'bo')
+R_pre = 30;
+manip.rate = @(t) R_pre .* ones(size(t));
 
-    plot(log10(R_pres),(equilvals.m),'ro')
-    plot(log10(R_pres),(equilvals.m_on),'ro')
+kf0s_sim = [1e-2 1e-3 1e-4 1e-5];
 
-    xlabel('PSP Rate');ylabel('CamKII Gates')
-    box off
-    axis tight
-    xlim(log10(R_pres([1 end])))
-    LogScale('x',10)
+for rr = 1:length(kf0s_sim)
+    bz_Counter(rr,length(kf0s_sim),'sim')
+    
+    parms.kf_0 = kf0s_sim(rr);
+    parms.k_CaN = kf0s_sim(rr)./kappa;
+    [simresults_kf0,parms] = Run_SynHomeo2(manip,parms,timeparms);
+    equilvals_kf0.Ca(rr) = simresults_kf0.Ca(end);
+    equilvals_kf0.b(rr) = simresults_kf0.b(end);
+    equilvals_kf0.m(rr) = simresults_kf0.m(end);
+    equilvals_kf0.n(rr) = simresults_kf0.n(end);
+    close all
 
-subplot(4,2,6)
-    hold on
-    plot(log10(R_pres),(equilvals.m),'ro')
-    plot(log10(R_pres),(equilvals.m_on),'ro')
-
-    xlabel('PSP Rate');ylabel('CamKII Gates')
-    box off
-    axis tight
-    xlim(log10(R_pres([1 end])))
-    LogScale('x',10)
-    ylim([0 0.01])
-
-subplot(4,2,7)
-hold on
-
-plot(log10(R_pres),equilvals.n,'ko')
-plot(log10(R_pres),equilvals.n_on,'ko')
-
-
-xlabel('PSP Rate');ylabel('CaN Gate')
-box off
-axis tight
-xlim(log10(R_pres([1 end])))
-LogScale('x',10)
-
-
-NiceSave('RCa',figfolder,[],'includeDate',true)
-
-
+end
 
 %%
+figure
+subplot(3,3,7)
+    plot((R),Ca,'k')
+    hold on
+    plot((R_kf0),Ca,'k:')
+    plot((R_none),Ca,'--','color',[0.5 0.5 0.5])
+    plot((R_full),Ca,'--','color',[0.5 0.5 0.5])
+    plot(R_pre,equilvals_kf0.Ca,'o')
+    ylabel('logCa')
+    %plot(log10(R),A,'r')
+    %LogScale('x',10)
+    xlabel('R');
+    box off
+    axis tight
+    axis tight
+    xlim([0 60])
+    yrange = ylim(gca);
+    title('k_f_0')
