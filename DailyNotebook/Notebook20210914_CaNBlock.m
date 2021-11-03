@@ -200,12 +200,12 @@ parms_TS.Ca_PSP0 = Ca_PSC0_TS;
 [simresults_NblockTS,simparms] = Run_SynHomeo2(manip,parms_TS,timeparms,'showfig',false);
 %%
 close all
-Plot_SynHomeo(simresults_NblockTS,'FixYRange',false,'fignum',2,'figwidth',2,'linecolor','r')
-Plot_SynHomeo(simresults_NblockWT(length(kfs)),'FixYRange',false,'saveFig',figfolder,...
+Plot_SynHomeo(simresults_NblockTS,'manip',manip,'FixYRange',true,'fignum',2,'figwidth',2,'linecolor','r')
+Plot_SynHomeo(simresults_NblockWT(length(kfs)),'manip',manip,'FixYRange',true,'saveFig',figfolder,...
     'figname','BlockN_autophos_Partial','fignum',2,'figwidth',2,'title','80% Effective')
 
 %%
-close all
+%close all
 %Plot_SynHomeo(simresults_NblockTS,'FixYRange',false,'fignum',2,'figwidth',2,'linecolor','r')
-Plot_SynHomeo(simresults_MNblock,'FixYRange',true,'saveFig',figfolder,...
+Plot_SynHomeo(simresults_MNblock,'manip',manip_NMblock,'FixYRange',true,'saveFig',figfolder,...
     'figname','BlockNM','fignum',2,'figwidth',2,'title','MNBlock')

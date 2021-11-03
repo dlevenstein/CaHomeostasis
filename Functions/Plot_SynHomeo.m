@@ -12,6 +12,7 @@ addParameter(p,'fignum',1)
 addParameter(p,'title',[])
 addParameter(p,'linecolor','k')
 addParameter(p,'CaMpool',false)
+addParameter(p,'manip',[])
 
 
 parse(p,varargin{:})
@@ -23,6 +24,7 @@ fignum = p.Results.fignum;
 plottitle = p.Results.title;
 linecolor = p.Results.linecolor;
 CaMpool = p.Results.CaMpool;
+manip = p.Results.manip;
 
 CDV = false;
 numplots = 6;
@@ -35,6 +37,15 @@ APOOL = false;
 if isfield(simresults,'g')
     APOOL = true;
     numplots = 7;
+end
+
+if ~isempty(manip)
+    if isfield(manip,'blockN')
+        simresults.n = simresults.n.*manip.blockN(simresults.t_sec);
+    end
+	if isfield(manip,'blockM')
+        simresults.n = simresults.m.*manip.blockM(simresults.t_sec);
+    end
 end
 
 %%
