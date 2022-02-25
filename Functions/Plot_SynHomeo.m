@@ -44,7 +44,10 @@ if ~isempty(manip)
         simresults.n = simresults.n.*manip.blockN(simresults.t_sec);
     end
 	if isfield(manip,'blockM')
-        simresults.n = simresults.m.*manip.blockM(simresults.t_sec);
+        simresults.m = simresults.m.*manip.blockM(simresults.t_sec);
+    end
+	if isfield(manip,'Autophos')
+        simresults.m = simresults.m.*manip.Autophos;
     end
 end
 

@@ -209,3 +209,10 @@ Plot_SynHomeo(simresults_NblockWT(length(kfs)),'manip',manip,'FixYRange',true,'s
 %Plot_SynHomeo(simresults_NblockTS,'FixYRange',false,'fignum',2,'figwidth',2,'linecolor','r')
 Plot_SynHomeo(simresults_MNblock,'manip',manip_NMblock,'FixYRange',true,'saveFig',figfolder,...
     'figname','BlockNM','fignum',2,'figwidth',2,'title','MNBlock')
+
+%%
+close all
+Plot_SynHomeo(simresults_MNblock,'manip',manip_NMblock,'FixYRange',false,'saveFig',figfolder,...
+    'fignum',2,'figwidth',2,'title','MNBlock')
+Plot_SynHomeo(simresults_NblockWT(length(kfs)),'manip',manip,'FixYRange',false,'saveFig',figfolder,...
+    'figname','BothExp','fignum',2,'figwidth',2,'linecolor','b')

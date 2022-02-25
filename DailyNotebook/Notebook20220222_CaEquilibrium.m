@@ -1,4 +1,4 @@
-figfolder  = '/Users/dl2820/Project Repos/CaHomeostasis/DailyNotebook/Notebook20210914';
+figfolder  = '/Users/dl2820/Project Repos/CaHomeostasis/DailyNotebook/Notebook20220222';
 
 %%
 Ca_0 = -8;%-8       %GluA1-independent (i.e. baseline) Calcium concentration
@@ -272,6 +272,26 @@ subplot(2,2,2)
     yrange = ylim(gca);
     legend('CaN-only','Alpha<->Beta CamKII','Alpha CamKII','location','southeast')
 
+subplot(2,2,3)
+    plot((R),10.^Ca,'k')
+    hold on
+    plot((R_mab),10.^Ca,'r')
+    plot((R_malpha),10.^Ca,'b')
+   % plot((R_mbeta),Ca,'g')
+    
+    plot((R_none),10.^Ca,'k--')
+    plot((R_full),10.^Ca,'k--')
+    ylabel('logCa')
+    %plot(log10(R),A,'r')
+    %LogScale('x',10)
+    xlabel('R');
+    box off
+    axis tight
+    axis tight
+    xlim([0 100])
+    ylim([0 2e-7])
+    legend('CaN-only','Alpha<->Beta CamKII','Alpha CamKII','location','southeast')
+    
 % subplot(2,2,2)
 %     plot(n,Ca)
 %     hold on
@@ -285,46 +305,46 @@ subplot(2,2,2)
 %     box off
 %     xlabel('n, A')
    
-subplot(3,3,7)
-    plot((R),Ca,'k')
-    hold on
-    plot((R_kf0),Ca,'k:')
-    plot((R_none),Ca,'--','color',[0.5 0.5 0.5])
-    plot((R_full),Ca,'--','color',[0.5 0.5 0.5])
-    ylabel('logCa')
-    %plot(log10(R),A,'r')
-    %LogScale('x',10)
-    xlabel('R');
-    box off
-    axis tight
-    axis tight
-    xlim([0 150])
-    yrange = ylim(gca);
-    title('k_f_0')
-    
-subplot(3,3,8)
-    plot((R),Ca,'k')
-    hold on
-    plot((R_kd),Ca,'k:')
-    plot((R_none),Ca,'--','color',[0.5 0.5 0.5])
-    plot((R_full),Ca,'--','color',[0.5 0.5 0.5])
-    ylabel('logCa')
-    %plot(log10(R),A,'r')
-    %LogScale('x',10)
-    xlabel('R');
-    box off
-    axis tight
-    axis tight
-    xlim([0 150])
-    yrange = ylim(gca);    
-    title('k_C_a_N')
-    
-    
-subplot(3,3,9)
-    plot(k_ratio,Rs,'k')
-    xlabel('k_f_0 / k_C_a_N')
-    ylabel('R_A_0_._5')
-    box off
+% subplot(3,3,7)
+%     plot((R),Ca,'k')
+%     hold on
+%     plot((R_kf0),Ca,'k:')
+%     plot((R_none),Ca,'--','color',[0.5 0.5 0.5])
+%     plot((R_full),Ca,'--','color',[0.5 0.5 0.5])
+%     ylabel('logCa')
+%     %plot(log10(R),A,'r')
+%     %LogScale('x',10)
+%     xlabel('R');
+%     box off
+%     axis tight
+%     axis tight
+%     xlim([0 150])
+%     yrange = ylim(gca);
+%     title('k_f_0')
+%     
+% subplot(3,3,8)
+%     plot((R),Ca,'k')
+%     hold on
+%     plot((R_kd),Ca,'k:')
+%     plot((R_none),Ca,'--','color',[0.5 0.5 0.5])
+%     plot((R_full),Ca,'--','color',[0.5 0.5 0.5])
+%     ylabel('logCa')
+%     %plot(log10(R),A,'r')
+%     %LogScale('x',10)
+%     xlabel('R');
+%     box off
+%     axis tight
+%     axis tight
+%     xlim([0 150])
+%     yrange = ylim(gca);    
+%     title('k_C_a_N')
+%     
+%     
+% subplot(3,3,9)
+%     plot(k_ratio,Rs,'k')
+%     xlabel('k_f_0 / k_C_a_N')
+%     ylabel('R_A_0_._5')
+%     box off
     
     
 NiceSave('RCa_A_mgate',figfolder,[],'includeDate',true)
